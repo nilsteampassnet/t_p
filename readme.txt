@@ -78,6 +78,9 @@ folder
 * G129 => 2.2
 
 --------------------------------  CHANGELOG  -----------------------------------
+2.1.10
+ * todo: share item -> manage error when email not sent
+
 2.1.9
  * #126-#132-#130-#131-#139-#129-#141-#146
  * Italian translation
