@@ -5,6 +5,11 @@ $TeamPass_url = '';
 }else{
 $TeamPass_url = $_SESSION['settings']['cpassman_url'];
 }
+$txt['settings_insert_manual_entry_item_history'] = "Enable permitting manual insertions in Items History log";
+$txt['settings_insert_manual_entry_item_history_tip'] = "";
+$txt['add_history_entry'] = "Add entry in History log";
+$txt['at_manual'] = "Manual action";
+$txt['at_manual_add'] = "Added manually";
 $txt['admin_path_to_upload_folder'] = "Path to Upload folder";
 $txt['admin_url_to_upload_folder'] = "URL to Upload folder";
 $txt['automatic_del_after_date_text'] = "or after date";

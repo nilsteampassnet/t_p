@@ -345,7 +345,7 @@ function AjouterItem(){
     else if ( $("#pw1").val() == "" ) erreur = "<?php echo $txt['error_pw'];?>";
     else if ( $("#categorie").val() == "na" ) erreur = "<?php echo $txt['error_group'];?>";
     else if ( $("#pw1").val() != $("#pw2").val() ) erreur = "<?php echo $txt['error_confirm'];?>";
-    else if ( $("#enable_delete_after_consultation").is(':checked') && ($("#times_before_deletion").val() < 1 && $("#deletion_after_date").val() == "") || ($("#times_before_deletion").val() == "" && $("#deletion_after_date").val() == "") ) erreur = "<?php echo $txt['error_times_before_deletion'];?>";
+    else if ( $("#enable_delete_after_consultation").is(':checked') && (($("#times_before_deletion").val() < 1 && $("#deletion_after_date").val() == "") || ($("#times_before_deletion").val() == "" && $("#deletion_after_date").val() == ""))) erreur = "<?php echo $txt['error_times_before_deletion'];?>";
     else if ( $("#item_tags").val() != "" && reg.test($("#item_tags").val()) ) erreur = "<?php echo $txt['error_tags'];?>";
     else{
         //Check pw complexity level
@@ -456,6 +456,7 @@ function AjouterItem(){
 
 		        		//emty form
                         $("#label, #item_login, #email, #url, #pw1, #pw1_txt, #pw2, #item_tags, #deletion_after_date, #times_before_deletion").val("");
+                        $("#enable_delete_after_consultation").attr('checked', false);
                         CKEDITOR.instances["desc"].setData("");
                         $("#item_file_queue").html("");
                         $("#categorie").val("");
@@ -783,16 +784,12 @@ function AfficherDetailsItem(id, salt_key_required, expired_item, restricted, di
                 //Show detail item
                 if (data.show_detail_option == "0") {
                     $("#item_details_ok").show();
-                    $("#item_details_expired").hide();
-                    $("#item_details_expired_full").hide();
+                    $("#item_details_expired, #item_details_expired_full").hide();
                 }if (data.show_detail_option == "1") {
-                    $("#item_details_ok").show();
-                    $("#item_details_expired").show();
+                    $("#item_details_ok, #item_details_expired").show();
                     $("#item_details_expired_full").hide();
                 }else if (data.show_detail_option == "2") {
-                    $("#item_details_ok").hide();
-                    $("#item_details_expired").hide();
-                    $("#item_details_expired_full").hide();
+                    $("#item_details_ok, #item_details_expired, #item_details_expired_full").hide();
                 }
                 $("#item_details_nok").hide();
                 $("#fileclass"+data.id).addClass("fileselected");
@@ -819,7 +816,7 @@ function AfficherDetailsItem(id, salt_key_required, expired_item, restricted, di
                     $("#hid_login").val(data.login);
                     $("#id_email").html(data.email);
                     $("#hid_email").val(data.email);
-                    $("#div_item_history").html(htmlspecialchars_decode(data.historique));
+                    $("#item_history_log").html(htmlspecialchars_decode(data.historique));
                     $("#id_restricted_to").html(data.id_restricted_to+data.id_restricted_to_roles);
                     $("#hid_restricted_to").val(data.id_restricted_to);
                     $("#hid_restricted_to_roles").val(data.id_restricted_to_roles);
@@ -842,8 +839,10 @@ function AfficherDetailsItem(id, salt_key_required, expired_item, restricted, di
                     //Anyone can modify button
                     if (data.anyone_can_modify == "1") {
                     	$("#edit_anyone_can_modify").attr('checked', true);
+						$("#new_history_entry_form").show();
                     }else{
                         $("#edit_anyone_can_modify").attr('checked', false);
+						$("#new_history_entry_form").hide();
                     }
 
                     //Show to be deleted in case activated
@@ -875,9 +874,11 @@ function AfficherDetailsItem(id, salt_key_required, expired_item, restricted, di
 					}
 	                else if (data.restricted == "1" || data.user_can_modify == "1") {
                 		$("#menu_button_edit_item, #menu_button_del_item, #menu_button_copy_item").removeAttr("disabled");
+						$("#new_history_entry_form").show();
 	                }
 	                else{
 	                    $("#menu_button_add_item, #menu_button_copy_item").removeAttr("disabled");
+						$("#new_history_entry_form").show();
 	                }
                     $("#menu_button_show_pw, #menu_button_copy_pw, #menu_button_copy_login, #menu_button_copy_link, #menu_button_history,, #menu_button_share").removeAttr("disabled");
 
@@ -1786,7 +1787,7 @@ $(function() {$('#toppathwrap').hide();
         "folder"    : "<?php echo $_SESSION['settings']['path_to_upload_folder'];?>",
         "sizeLimit" : 16777216,
         "queueID"   : "item_file_queue",
-        "onComplete": function(event, queueID, fileObj, reponse, data){$("#item_files_upload").append(fileObj.name+"<br />");},
+        "onComplete": function(event, queueID, fileObj, reponse, data){$("#item_list_files").append(fileObj.name+"<br />");},
         "buttonText": "<?php echo $txt['upload_button_text'];?>"
     });
 
@@ -1985,4 +1986,33 @@ function items_list_filter(id){
     }
 }
 
+function manage_history_entry(action, entry_id){
+	if(action == "add_entry" && $("#add_history_entry_label").val() != ""){
+		//Check if user allowed
+		
+		//prepare
+		var data = '{"label":"'+sanitizeString($('#add_history_entry_label').val())+'", "item_id":"'+$('#id_item').val()+'",}';
+		
+		//Send query
+		$.post(
+			"sources/items.queries.php",
+			{
+				type    : "history_entry_add",
+				data	: $("#add_history_entry_label").val(),
+				key		: "<?php echo $_SESSION['key'];?>"
+			},
+			function(data){
+				//check if format error
+				if (data[0].error == "") {
+					$("#item_history_log_error").html().hide();
+					$("#add_history_entry_label").val("");
+					$("#item_history_log").append(data[0].new_line);
+				}else{
+					$("#item_history_log_error").html(data[0].error).show();
+				}
+			},
+			"json"
+		);
+	}
+}
 </script>

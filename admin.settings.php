@@ -322,6 +322,11 @@ if (isset($_POST['save_button'])) {
 	if(isset($_POST['bck_script_filename'])) UpdateSettings('bck_script_filename', $_POST['bck_script_filename'], 'settings');
 	if(isset($_POST['bck_script_path'])) UpdateSettings('bck_script_path', $_POST['bck_script_path'], 'settings');
 	if(isset($_POST['bck_script_key'])) UpdateSettings('bck_script_key', $_POST['bck_script_key'], 'settings');
+	
+	//Update insert_manual_entry_item_history
+	if ( @$_SESSION['settings']['insert_manual_entry_item_history'] != $_POST['insert_manual_entry_item_history'] ){
+		UpdateSettings('insert_manual_entry_item_history',$_POST['insert_manual_entry_item_history']);
+	}
 }
 
 echo '
@@ -944,6 +949,21 @@ echo '
 					</td><td>
 				    <input type="text" size="4" id="nb_items_by_query" name="nb_items_by_query" value="', isset($_SESSION['settings']['nb_items_by_query']) ? $_SESSION['settings']['nb_items_by_query'] : '', '" class="text ui-widget-content ui-corner-all" />
 				<tr><td>';
+
+				//enable add manual entries in History
+				echo '
+				<tr><td>
+				    <span class="ui-icon ui-icon-wrench" style="float: left; margin-right: .3em;">&nbsp;</span>
+				    <label>
+				    	'.$txt['settings_insert_manual_entry_item_history'].'
+						<span style="margin-left:0px;"><img src="includes/images/question-small-white.png" class="tip" alt="" title="'.$txt['settings_insert_manual_entry_item_history_tip'].'" /></span>
+					</label>
+				    </td><td>
+				    <div class="div_radio">
+						<input type="radio" id="insert_manual_entry_item_history_radio1" name="insert_manual_entry_item_history" value="1"', isset($_SESSION['settings']['insert_manual_entry_item_history']) && $_SESSION['settings']['insert_manual_entry_item_history'] == 1 ? ' checked="checked"' : '', ' /><label for="insert_manual_entry_item_history_radio1">'.$txt['yes'].'</label>
+						<input type="radio" id="insert_manual_entry_item_history_radio2" name="insert_manual_entry_item_history" value="0"', isset($_SESSION['settings']['insert_manual_entry_item_history']) && $_SESSION['settings']['insert_manual_entry_item_history'] != 1 ? ' checked="checked"' : (!isset($_SESSION['settings']['insert_manual_entry_item_history']) ? ' checked="checked"':''), ' /><label for="insert_manual_entry_item_history_radio2">'.$txt['no'].'</label>
+					</div>
+				</td</tr>';
 
             echo '
 			</table>

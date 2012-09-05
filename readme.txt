@@ -80,6 +80,7 @@ folder
 --------------------------------  CHANGELOG  -----------------------------------
 2.1.10
  * todo: share item -> manage error when email not sent
+ * Adding a manual entry in the History log of an Item
 
 2.1.9
  * #126-#132-#130-#131-#139-#129-#141-#146

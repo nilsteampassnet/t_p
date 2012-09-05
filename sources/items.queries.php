@@ -724,11 +724,11 @@ if ( isset($_POST['type']) ){
                         $icon_image = file_format_image($reccord['extension']);
                         // If file is an image, then prepare lightbox. If not image, then prepare donwload
                         if ( in_array($reccord['extension'],$k['image_file_ext']) )
-                            $files .=   '<img src="includes/images/'.$icon_image.'" /><a class="image_dialog" href="'.$_SESSION['settings']['url_to_upload_folder'].'/'.$reccord['file'].'" title="'.$reccord['name'].'">'.$reccord['name'].'</a><br />';
+                            $files .=   '<img src=\''.$_SESSION['settings']['cpassman_url'].'/includes/images/'.$icon_image.'\' /><a class=\'image_dialog\' href=\''.$_SESSION['settings']['url_to_upload_folder'].'/'.$reccord['file'].'\' title=\''.$reccord['name'].'\'>'.$reccord['name'].'</a><br />';
                         else
                             $files .=   '<img src="includes/images/'.$icon_image.'" /><a href=\'sources/downloadFile.php?name='.urlencode($reccord['name']).'&type=sub&file='.$reccord['file'].'&size='.$reccord['size'].'&type='.urlencode($reccord['type']).'&key='.$_SESSION['key'].'&key_tmp='.$_SESSION['key_tmp'].'\' target=\'_blank\'>'.$reccord['name'].'</a><br />';
                         // Prepare list of files for edit dialogbox
-                        $files_edit .= '<span id="span_edit_file_'.$reccord['id'].'"><img src="includes/images/'.$icon_image.'" /><img src="includes/images/document--minus.png" style="cursor:pointer;"  onclick="delete_attached_file(\"'.$reccord['id'].'\")" />&nbsp;'.$reccord['name']."</span><br />";
+                        $files_edit .= '<span id=\'span_edit_file_'.$reccord['id'].'\'><img src=\''.$_SESSION['settings']['cpassman_url'].'/includes/images/'.$icon_image.'\' /><img src=\''.$_SESSION['settings']['cpassman_url'].'/includes/images/document--minus.png\' style=\'cursor:pointer;\'  onclick=\'delete_attached_file(\"'.$reccord['id'].'\")\' />&nbsp;'.$reccord['name']."</span><br />";
                     }
 
                 //Send email
@@ -2310,7 +2310,38 @@ if ( isset($_POST['type']) ){
     			}
     		}
     	break;
+		
+		/*
+       	* CASE
+       	* Item History Log - add new entry
+       	*/
+    	case "history_entry_add":
+			$error = "";
 
+        	//decrypt and retreive data in JSON format
+        	require_once '../includes/libraries/crypt/aes.class.php';     // AES PHP implementation
+        	require_once '../includes/libraries/crypt/aesctr.class.php';  // AES Counter Mode implementation
+        	$data_received = json_decode((AesCtr::decrypt($_POST['data'], $_SESSION['key'], 256)), true);
+			
+    		//Query
+			$db->query_insert(
+				'log_items',
+				array(
+					'id_item' => $data_received['item_id'],
+					'date' => mktime(date('H'),date('i'),date('s'),date('m'),date('d'),date('y')),
+					'id_user' => $_SESSION['user_id'],
+					'action' => 'at_manual',
+	                'raison' => 'at_manual_add : '.htmlspecialchars_decode($data_received['label'])
+				)
+			);
+
+    		//Prepare new line
+			$data = $db->query_first("SELECT * FROM ".$pre."log_items WHERE id = '".$data_received['item_id']."'");
+			$historic = date($_SESSION['settings']['date_format']." ".$_SESSION['settings']['time_format'], $data['date'])." - ". $data['login'] ." - ".$txt[$data['action']]." - ".(!empty($data['raison']) ? (count($reason) > 1 ? $txt[trim($reason[0])].' : '.$reason[1] : $txt[trim($reason[0])] ):'');
+			
+			//send back
+			echo '["error":"" , "new_line" : "'.addslashes($historic).'"}]';
+    	break;
 
     }
 }
